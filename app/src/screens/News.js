@@ -2,16 +2,22 @@ import { useState, useEffect } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  FlatList, Image,
-  Modal, StyleSheet,
+  FlatList,
+  Image,
+  Modal,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
+  ScrollView
 } from 'react-native';
-// Importa la función que carga las noticias
+import { Ionicons } from '@expo/vector-icons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { getNoticiasVisibles, newNoticia } from '../../../api/noticias.js';
+import NewForm from '../components/NoticiasForm.js';
 
 const NoticiasScreen = () => {
+  const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
   const [noticias, setNoticias] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -28,7 +34,6 @@ const NoticiasScreen = () => {
     }
   };
 
-  // 1. Llama a la función `fetchNoticias` cuando el componente se monta
   useEffect(() => {
     fetchNoticias();
   }, []);
@@ -37,18 +42,21 @@ const NoticiasScreen = () => {
     try {
       setLoading(true);
       const prompt = `Genera una noticia ciclista en Colombia. Incluye título, descripción, autor y una imagen representativa (URL).`;
-      
-      const resGemini = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyAP9oC0wp9-4VW6BEQf_zJLyRks8bh6s_Q`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
-        })
-      });
+
+      const resGemini = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=TU_API_KEY`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }]
+          })
+        }
+      );
 
       const data = await resGemini.json();
       const texto = data?.candidates?.[0]?.content?.parts?.[0]?.text || "No se generó.";
-      
+
       const tituloMatch = texto.match(/Título: (.+)/i);
       const descripcionMatch = texto.match(/Descripción:([\s\S]*?)Autor:/i);
       const autorMatch = texto.match(/Autor: (.+)/i);
@@ -60,7 +68,7 @@ const NoticiasScreen = () => {
         autor: { nombre: autorMatch?.[1]?.trim() || "Desconocido" },
         imagen: imagenMatch?.[0] || null
       };
-      
+
       await newNoticia(nuevaNoticia);
 
       Alert.alert("Generada", "La noticia fue generada correctamente.");
@@ -73,17 +81,24 @@ const NoticiasScreen = () => {
     }
   };
 
-  // 2. Esta función se encarga de renderizar cada item de la lista
   const renderItem = ({ item }) => (
-    <View style={styles.noticiaContainer}>
-      {item.imagen && <Image source={{ uri: item.imagen }} style={styles.imagen} />}
+    <TouchableOpacity
+      style={styles.noticiaContainer}
+      onPress={() => setNoticiaSeleccionada(item)}
+    >
+      {item.imagen && (
+        <Image
+          source={{ uri: item.imagen }}
+          style={styles.imagen}
+        />
+      )}
       <View style={styles.textoContainer}>
         <Text style={styles.titulo}>{item.titulo}</Text>
         <Text numberOfLines={3} style={styles.descripcion}>{item.descripcion}</Text>
         <Text style={styles.autor}>Autor: {item.autor?.nombre || 'Desconocido'}</Text>
         <Text style={styles.fecha}>{item.fecha?.substring(0, 10)}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -91,35 +106,73 @@ const NoticiasScreen = () => {
       {loading ? (
         <ActivityIndicator size="large" color="#2196F3" />
       ) : (
-        // 3. Usa FlatList para renderizar la lista de noticias
         <FlatList
-          data={noticias} // `data` es el array de noticias
+          data={noticias}
           keyExtractor={(item) => item._id}
-          renderItem={renderItem} // `renderItem` es la función para renderizar cada item
+          renderItem={renderItem}
         />
       )}
 
+      {/* Botón flotante para agregar noticias */}
       <TouchableOpacity
-        style={styles.botonAgregar}
+        style={styles.fab}
         onPress={() => setModalVisible(true)}
       >
-        <Text style={styles.textoBoton}>Agregar Noticia</Text>
+        <Ionicons name="add" size={28} color="#fff" />
       </TouchableOpacity>
 
+      {/* Botón flotante para generar noticias */}
       <TouchableOpacity
-        style={styles.botonGenerar}
+        style={styles.fabGenerar}
         onPress={generarYGuardarNoticia}
       >
-        <Text style={styles.textoBoton}>+ Generar Noticia</Text>
+        <Ionicons name="sparkles" size={26} color="#fff" />
       </TouchableOpacity>
 
+      {/* Modal Formulario */}
       <Modal
         visible={modalVisible}
         animationType="slide"
         onRequestClose={() => setModalVisible(false)}
       >
-        <Text>Formulario para agregar noticias</Text>
+        <NewForm onClose={() => { setModalVisible(false); fetchNoticias(); }} />
       </Modal>
+
+      {/* Modal Detalle */}
+      <Modal
+  visible={!!noticiaSeleccionada}
+  animationType="slide"
+  onRequestClose={() => setNoticiaSeleccionada(null)}
+>
+  <ScrollView style={styles.modalDetalle}>
+
+    {/* Encabezado de detalle con botón de cerrar */}
+    <View style={styles.header}>
+      <Text style={styles.headerTitle}>Detalle de Noticia</Text>
+      <TouchableOpacity
+        onPress={() => setNoticiaSeleccionada(null)}
+        style={styles.closeButton}
+      >
+        <FontAwesome name="close" size={20} color="#fff" />
+      </TouchableOpacity>
+    </View>
+
+    {noticiaSeleccionada?.imagen && (
+      <Image
+        source={{ uri: noticiaSeleccionada.imagen }}
+        style={styles.imagenGrande}
+      />
+    )}
+    <Text style={styles.tituloDetalle}>{noticiaSeleccionada?.titulo}</Text>
+    <Text style={styles.descripcionDetalle}>{noticiaSeleccionada?.descripcion}</Text>
+    <Text style={styles.autorDetalle}>
+      Autor: {noticiaSeleccionada?.autor?.nombre || 'Desconocido'}
+    </Text>
+    <Text style={styles.fechaDetalle}>
+      {noticiaSeleccionada?.fecha?.substring(0, 10)}
+    </Text>
+  </ScrollView>
+</Modal>
     </View>
   );
 };
@@ -165,28 +218,79 @@ const styles = StyleSheet.create({
     marginTop: 4,
     color: 'gray',
   },
-  botonAgregar: {
+  fab: {
     backgroundColor: '#2196F3',
-    padding: 12,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 8,
     position: 'absolute',
     bottom: 16,
     right: 16,
   },
-  botonGenerar: {
+  fabGenerar: {
     backgroundColor: '#FF9800',
-    padding: 12,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 8,
     position: 'absolute',
     bottom: 80,
     right: 16,
   },
-  textoBoton: {
-    color: '#fff',
-    fontWeight: 'bold',
+  modalDetalle: {
+    flex: 1,
+    backgroundColor: '#000',
+    padding: 16,
   },
+  cerrarModal: {
+    color: '#ff4444',
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  imagenGrande: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  tituloDetalle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 10,
+  },
+  descripcionDetalle: {
+    fontSize: 16,
+    color: '#ddd',
+    marginBottom: 10,
+  },
+  autorDetalle: {
+    fontStyle: 'italic',
+    color: '#aaa',
+  },
+  fechaDetalle: {
+    color: 'gray',
+    marginTop: 4,
+  },
+  header: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 20
+},
+headerTitle: {
+  fontSize: 20,
+  color: '#63FB00',
+  fontWeight: 'bold'
+},
+closeButton: {
+  padding: 6,
+  backgroundColor: '#1A1A1A',
+  borderRadius: 20
+}
 });
 
 export default NoticiasScreen;

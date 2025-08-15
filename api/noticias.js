@@ -2,7 +2,7 @@ const API_URL = 'https://ciclysan.onrender.com/api/noticias';
 
 export const getNoticiasVisibles = async () => {
   try {
-    const res = await fetch(`${API_URL}`);
+    const res = await fetch(`${API_URL}/visibles`);
     if (!res.ok) {
       throw new Error('Error al obtener noticias');
     }
