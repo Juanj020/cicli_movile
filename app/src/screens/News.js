@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -12,12 +12,14 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { getNoticiasVisibles } from '../../../api/noticias.js';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
+import { AuthContext } from '../context/AuthContext.js'; // 🆕 Importa AuthContext
 
 const NoticiasScreen = () => {
     const navigation = useNavigation();
     const isFocused = useIsFocused();
     const [noticias, setNoticias] = useState([]);
     const [loading, setLoading] = useState(false);
+    const { user } = useContext(AuthContext); // 🆕 Obtén el usuario del contexto
 
     const fetchNoticias = async () => {
         try {
@@ -40,7 +42,7 @@ const NoticiasScreen = () => {
     const renderItem = ({ item }) => (
         <TouchableOpacity
             style={styles.noticiaContainer}
-            onPress={() => navigation.navigate('NewsDetail', { noticia: item })} // Navega al detalle
+            onPress={() => navigation.navigate('NewsDetail', { noticia: item })}
         >
             {item.imagen && (
                 <Image
@@ -68,18 +70,20 @@ const NoticiasScreen = () => {
                     renderItem={renderItem}
                 />
             )}
-
-            {/* Botón flotante para la administración */}
-            <TouchableOpacity
-                style={styles.fabAdmin}
-                onPress={() => navigation.navigate('NewsAdmin')}
-            >
-                <Ionicons name="settings" size={28} color="#fff" />
-            </TouchableOpacity>
+            
+            {/* 🆕 Renderiza el botón de administración solo si el usuario es 'ADMIN' */}
+            {user && user.rol === 'ADMIN' && (
+                <TouchableOpacity
+                    style={[styles.fabBase, styles.fabAdmin]}
+                    onPress={() => navigation.navigate('NewsAdmin')}
+                >
+                    <Ionicons name="settings-outline" size={28} color="#fff" />
+                </TouchableOpacity>
+            )}
 
             {/* Botón flotante para crear una noticia */}
             <TouchableOpacity
-                style={styles.fabAdd}
+                style={[styles.fabBase, styles.fabAdd]}
                 onPress={() => navigation.navigate('NewsForm', { noticia: null })}
             >
                 <Ionicons name="add" size={28} color="#fff" />
@@ -129,27 +133,27 @@ const styles = StyleSheet.create({
         marginTop: 4,
         color: 'gray',
     },
+    fabBase: {
+        position: 'absolute',
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        right: 20,
+    },
     fabAdd: {
         backgroundColor: '#63FB00',
-        width: 56,
-        height: 56,
-        borderRadius: 28,
-        justifyContent: 'center',
-        alignItems: 'center',
-        position: 'absolute',
-        bottom: 16,
-        right: 16,
+        bottom: 20,
     },
     fabAdmin: {
-        backgroundColor: '#2196F3',
-        width: 56,
-        height: 56,
-        borderRadius: 28,
-        justifyContent: 'center',
-        alignItems: 'center',
-        position: 'absolute',
-        bottom: 80,
-        right: 16,
+        backgroundColor: '#FF9800',
+        bottom: 90,
     },
 });
 

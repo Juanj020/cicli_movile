@@ -1,16 +1,20 @@
 // src/screens/Rutes.js
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, SafeAreaView, StyleSheet, View, TouchableOpacity, Text  } from 'react-native';
+import React, { useEffect, useState, useContext } from 'react';
+import { ActivityIndicator, FlatList, SafeAreaView, StyleSheet, View, TouchableOpacity, Text } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getRutasVisibles } from '../../../api/rutas.js';
 import RutaCard from '../components/RutaCard.js';
 import { Ionicons } from '@expo/vector-icons';
+import { AuthContext } from '../context/AuthContext.js'; // 🆕 Importa el contexto de autenticación
 
 export default function Rutes({ navigation }) {
   const [rutas, setRutas] = useState([]);
   const [rutasFiltradas, setRutasFiltradas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState('Todos');
+
+  // 🆕 Usa el contexto para obtener el usuario
+  const { user } = useContext(AuthContext);
 
   const fetchRutas = async () => {
     try {
@@ -24,7 +28,6 @@ export default function Rutes({ navigation }) {
     }
   };
 
-  // 🔄 Usa useFocusEffect en lugar de useEffect
   useFocusEffect(
     React.useCallback(() => {
       fetchRutas();
@@ -81,13 +84,16 @@ export default function Rutes({ navigation }) {
       >
         <Ionicons name="add" size={28} color="#fff" />
       </TouchableOpacity>
-      {/* Nuevo botón flotante para el panel de administración */}
-      <TouchableOpacity
-        style={[styles.botonFlotante, styles.botonAdmin]}
-        onPress={() => navigation.navigate('RutasAdmin')}
-      >
-        <Ionicons name="settings-outline" size={28} color="#fff" />
-      </TouchableOpacity>
+
+      {/* 🆕 Renderiza el botón de administración solo si el usuario es 'admin' */}
+      {user && user.rol === 'ADMIN' && (
+        <TouchableOpacity
+          style={[styles.botonFlotante, styles.botonAdmin]}
+          onPress={() => navigation.navigate('RutasAdmin')}
+        >
+          <Ionicons name="settings-outline" size={28} color="#fff" />
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 }

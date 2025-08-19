@@ -12,7 +12,7 @@ import LoginScreen from '../screens/Login.js';
 import NewsScreen from '../screens/News.js';
 import ProfileScreen from '../screens/Profile.js';
 import RegisterScreen from '../screens/RegisterUser.js';
-import StoreScreen from '../screens/Store.js';
+import TiendasScreen from '../screens/Store.js';
 import RutaDetailScreen from '../components/RutaDetail.js';
 import RutasScreen from '../screens/Rutes.js';
 import RecuperarScreen from '../screens/Recuperar.js';
@@ -24,6 +24,11 @@ import NewsAdminScreen from '../screens/NewsAdmin.js';
 import NewsForm from '../screens/NoticiasForm.js';
 import NewsDetailScreen from '../screens/NewsDetail.js';
 import NoticiaEditScreen from '../screens/NoticiaEdit.js';
+import TiendaDetailScreen from '../screens/TiendaDetail.js';
+import SugerirTiendaScreen from '../screens/SugerirTienda.js'; // 🆕 Importa la nueva vista
+import TiendasAdminScreen from '../screens/TiendasAdmin.js';
+import TiendaEditScreen from '../screens/TiendaEdit.js';
+import SugerirTiendaIA from '../screens/SugerirTiendaIA.js';
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -54,6 +59,19 @@ function NewsStack() {
     );
 }
 
+function StoreStack() {
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Tiendas" component={TiendasScreen} />
+            <Stack.Screen name="TiendaDetail" component={TiendaDetailScreen} />
+            <Stack.Screen name="SugerirTienda" component={SugerirTiendaScreen} />
+            <Stack.Screen name="TiendasAdmin" component={TiendasAdminScreen} />
+            <Stack.Screen name="TiendaEdit" component={TiendaEditScreen} />
+            <Stack.Screen name="SugerirTiendaIA" component={SugerirTiendaIA} />
+        </Stack.Navigator>
+    );
+}
+
 function TabNavigation() {
     return (
         <>
@@ -64,8 +82,8 @@ function TabNavigation() {
                     tabBarIcon: ({ color, size }) => {
                         let iconName;
                         if (route.name === 'Home') iconName = 'home';
-                        else if (route.name === 'RutesTab') iconName = 'map';
-                        else if (route.name === 'NewsTab') iconName = 'newspaper';
+                        else if (route.name === 'Rutes') iconName = 'map';
+                        else if (route.name === 'News') iconName = 'newspaper';
                         else if (route.name === 'Store') iconName = 'cart';
                         return <Ionicons name={iconName} size={size} color={color} />;
                     },
@@ -78,10 +96,10 @@ function TabNavigation() {
                 })}
             >
                 <Tab.Screen name="Home" component={HomeScreen} />
-                <Tab.Screen name="RutesTab" component={RutesStack} />
+                <Tab.Screen name="Rutes" component={RutesStack} />
                 {/* ✅ Paso 2: Usa el NewsStack en lugar de la pantalla News */}
-                <Tab.Screen name="NewsTab" component={NewsStack} />
-                <Tab.Screen name="Store" component={StoreScreen} />
+                <Tab.Screen name="News" component={NewsStack} />
+                <Tab.Screen name="Store" component={StoreStack} />
             </Tab.Navigator>
         </>
     );
