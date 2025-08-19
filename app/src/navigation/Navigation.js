@@ -18,6 +18,12 @@ import RutasScreen from '../screens/Rutes.js';
 import RecuperarScreen from '../screens/Recuperar.js';
 import ResetPasswordScreen from '../screens/ResetPassword.js';
 import SugerirRuta from '../screens/SugerirRuta.js';
+import RutasAdminScreen from '../screens/RutasAdmin.js';
+import RutaEditScreen from '../screens/RutaEdit.js';
+import NewsAdminScreen from '../screens/NewsAdmin.js';
+import NewsForm from '../screens/NoticiasForm.js';
+import NewsDetailScreen from '../screens/NewsDetail.js';
+import NoticiaEditScreen from '../screens/NoticiaEdit.js';
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -29,6 +35,21 @@ function RutesStack() {
             <Stack.Screen name="Rutas" component={RutasScreen} /> 
             <Stack.Screen name="RutaDetail" component={RutaDetailScreen} />
             <Stack.Screen name="SugerirRuta" component={SugerirRuta} />
+            <Stack.Screen name="RutasAdmin" component={RutasAdminScreen} />
+            <Stack.Screen name="RutaEdit" component={RutaEditScreen} />
+        </Stack.Navigator>
+    );
+}
+
+// 🆕 Crea una Stack para las noticias
+function NewsStack() {
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="News" component={NewsScreen} />
+            <Stack.Screen name="NewsAdmin" component={NewsAdminScreen} />
+            <Stack.Screen name="NewsForm" component={NewsForm} />
+            <Stack.Screen name="NewsDetail" component={NewsDetailScreen} />
+            <Stack.Screen name="NoticiaEdit" component={NoticiaEditScreen} />
         </Stack.Navigator>
     );
 }
@@ -42,12 +63,10 @@ function TabNavigation() {
                     headerShown: false,
                     tabBarIcon: ({ color, size }) => {
                         let iconName;
-
                         if (route.name === 'Home') iconName = 'home';
                         else if (route.name === 'RutesTab') iconName = 'map';
-                        else if (route.name === 'News') iconName = 'newspaper';
+                        else if (route.name === 'NewsTab') iconName = 'newspaper';
                         else if (route.name === 'Store') iconName = 'cart';
-
                         return <Ionicons name={iconName} size={size} color={color} />;
                     },
                     tabBarActiveTintColor: '#63FB00',
@@ -60,7 +79,8 @@ function TabNavigation() {
             >
                 <Tab.Screen name="Home" component={HomeScreen} />
                 <Tab.Screen name="RutesTab" component={RutesStack} />
-                <Tab.Screen name="News" component={NewsScreen} />
+                {/* ✅ Paso 2: Usa el NewsStack en lugar de la pantalla News */}
+                <Tab.Screen name="NewsTab" component={NewsStack} />
                 <Tab.Screen name="Store" component={StoreScreen} />
             </Tab.Navigator>
         </>
@@ -84,16 +104,16 @@ function MainDrawer() {
   return (
     <Drawer.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: '#000' }, // barra negra arriba
-        headerTintColor: '#fff', // texto blanco
+        headerStyle: { backgroundColor: '#000' },
+        headerTintColor: '#fff',
         drawerStyle: {
-          backgroundColor: '#333', // fondo gris del menú
+          backgroundColor: '#333',
         },
         drawerLabelStyle: {
-          color: '#fff', // texto blanco en las opciones
+          color: '#fff',
         },
-        drawerActiveTintColor: '#63FB00', // color del texto/icono activo
-        drawerInactiveTintColor: '#ccc', // color del texto/icono inactivo
+        drawerActiveTintColor: '#63FB00',
+        drawerInactiveTintColor: '#ccc',
       }}
     >
       <Drawer.Screen name="Inicio" component={TabNavigation} />
@@ -111,11 +131,10 @@ function MainDrawer() {
 export default function Navigation() {
   const { user, loading } = useContext(AuthContext);
 
-  if (loading) return null; // <- o mostrar una pantalla de carga
+  if (loading) return null;
 
   return (
     <NavigationContainer>
-      {/* <MainDrawer /> */}
       {user ? <MainDrawer /> : <AuthStack />}
     </NavigationContainer>
   );

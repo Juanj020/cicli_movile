@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     TextInput,
@@ -9,29 +9,33 @@ import {
     Text,
     Image,
     TouchableOpacity,
+    ActivityIndicator
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
-import { postRutas } from '../../../api/rutas.js';
+import * as ImagePicker from 'expo-image-picker';
+import { updateRuta } from '../../../api/rutas.js';
 
-export default function SugerirRuta({ navigation }) {
+export default function RutaEditScreen({ route, navigation }) {
+    const { ruta } = route.params;
+
     const [form, setForm] = useState({
-        nombreRut: '',
-        descripcion: '',
-        dificultad: 'Fácil',
-        kilometros: '',
-        punto_partida: '',
-        punto_llegada: '',
-        tiempo_aprox: '',
-        altitud_min: '',
-        altitud_max: '',
-        recomendaciones: '',
-        imagen: '',
-        link: '',
-        estado: 'Invisible',
+        nombreRut: ruta.nombreRut || '',
+        descripcion: ruta.descripcion || '',
+        dificultad: ruta.dificultad || 'Fácil',
+        kilometros: ruta.kilometros?.toString() || '',
+        punto_partida: ruta.punto_partida || '',
+        punto_llegada: ruta.punto_llegada || '',
+        tiempo_aprox: ruta.tiempo_aprox || '',
+        altitud_min: ruta.altitud_min?.toString() || '',
+        altitud_max: ruta.altitud_max?.toString() || '',
+        recomendaciones: ruta.recomendaciones || '',
+        imagen: ruta.imagen || '',
+        link: ruta.link || '',
+        estado: ruta.estado || 'Invisible'
     });
 
-    const [imagenSeleccionada, setImagenSeleccionada] = useState(null);
+    const [imagenSeleccionada, setImagenSeleccionada] = useState(form.imagen);
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (name, value) => {
         setForm({ ...form, [name]: value });
@@ -63,30 +67,17 @@ export default function SugerirRuta({ navigation }) {
         }
     };
 
-    const validateRequired = () => {
-        const requiredFields = ['nombreRut', 'descripcion', 'dificultad', 'punto_partida', 'punto_llegada'];
-        for (let field of requiredFields) {
-            if (!form[field].trim()) {
-                Alert.alert('Campo requerido', `Por favor completa el campo: ${field.replace('_', ' ')}`);
-                return false;
-            }
-        }
-        return true;
-    };
-
     const handleSubmit = async () => {
-        if (!validateRequired()) return;
-
+        setLoading(true);
         try {
-            await postRutas(form);
-            Alert.alert(
-                'Ruta enviada',
-                'Gracias por sugerir una ruta. Tu propuesta será revisada y, si es aprobada, aparecerá en la lista.'
-            );
+            await updateRuta(ruta._id, form);
+            Alert.alert('Éxito', 'Ruta actualizada correctamente.');
             navigation.goBack();
         } catch (error) {
-            console.error(error);
-            Alert.alert('Error', 'No se pudo enviar la ruta.');
+            console.error('Error al actualizar la ruta:', error);
+            Alert.alert('Error', 'No se pudo actualizar la ruta.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -98,24 +89,28 @@ export default function SugerirRuta({ navigation }) {
             />
 
             <TouchableOpacity style={styles.botonImagen} onPress={pickImage}>
-                <Text style={styles.botonImagenTexto}>Seleccionar Imagen</Text>
+                <Text style={styles.botonImagenTexto}>Cambiar Imagen</Text>
             </TouchableOpacity>
 
-            <Text style={styles.infoText}>
-                💡 Esta es una sugerencia de ruta. Será revisada antes de aparecer en la aplicación.
-            </Text>
-
-            {/* Campos con etiquetas */}
             <View style={styles.inputGroup}>
                 <Text style={styles.label}>* Nombre de la ruta</Text>
-                <TextInput style={styles.input} onChangeText={(v) => handleChange('nombreRut', v)} value={form.nombreRut} />
-            </View>
-            <View style={styles.inputGroup}>
-                <Text style={styles.label}>* Descripción</Text>
-                <TextInput style={[styles.input, styles.multiline]} multiline onChangeText={(v) => handleChange('descripcion', v)} value={form.descripcion} />
+                <TextInput
+                    style={styles.input}
+                    value={form.nombreRut}
+                    onChangeText={(v) => handleChange('nombreRut', v)}
+                />
             </View>
 
-            {/* Picker para Dificultad */}
+            <View style={styles.inputGroup}>
+                <Text style={styles.label}>* Descripción</Text>
+                <TextInput
+                    style={[styles.input, styles.multiline]}
+                    multiline
+                    value={form.descripcion}
+                    onChangeText={(v) => handleChange('descripcion', v)}
+                />
+            </View>
+
             <View style={styles.inputGroup}>
                 <Text style={styles.label}>* Dificultad</Text>
                 <View style={styles.pickerContainer}>
@@ -135,38 +130,81 @@ export default function SugerirRuta({ navigation }) {
 
             <View style={styles.inputGroup}>
                 <Text style={styles.label}>Kilómetros</Text>
-                <TextInput style={styles.input} keyboardType="numeric" onChangeText={(v) => handleChange('kilometros', v)} value={form.kilometros} />
-            </View>
-            <View style={styles.inputGroup}>
-                <Text style={styles.label}>* Punto de partida</Text>
-                <TextInput style={styles.input} onChangeText={(v) => handleChange('punto_partida', v)} value={form.punto_partida} />
-            </View>
-            <View style={styles.inputGroup}>
-                <Text style={styles.label}>* Punto de llegada</Text>
-                <TextInput style={styles.input} onChangeText={(v) => handleChange('punto_llegada', v)} value={form.punto_llegada} />
-            </View>
-            <View style={styles.inputGroup}>
-                <Text style={styles.label}>Tiempo aproximado</Text>
-                <TextInput style={styles.input} onChangeText={(v) => handleChange('tiempo_aprox', v)} value={form.tiempo_aprox} />
-            </View>
-            <View style={styles.inputGroup}>
-                <Text style={styles.label}>Altitud mínima</Text>
-                <TextInput style={styles.input} keyboardType="numeric" onChangeText={(v) => handleChange('altitud_min', v)} value={form.altitud_min} />
-            </View>
-            <View style={styles.inputGroup}>
-                <Text style={styles.label}>Altitud máxima</Text>
-                <TextInput style={styles.input} keyboardType="numeric" onChangeText={(v) => handleChange('altitud_max', v)} value={form.altitud_max} />
-            </View>
-            <View style={styles.inputGroup}>
-                <Text style={styles.label}>Recomendaciones</Text>
-                <TextInput style={styles.input} onChangeText={(v) => handleChange('recomendaciones', v)} value={form.recomendaciones} />
-            </View>
-            <View style={styles.inputGroup}>
-                <Text style={styles.label}>Link (Opcional)</Text>
-                <TextInput style={styles.input} onChangeText={(v) => handleChange('link', v)} value={form.link} />
+                <TextInput
+                    style={styles.input}
+                    keyboardType="numeric"
+                    value={form.kilometros}
+                    onChangeText={(v) => handleChange('kilometros', v)}
+                />
             </View>
 
-            <Button title="Enviar sugerencia" onPress={handleSubmit} color="#63FB00" />
+            <View style={styles.inputGroup}>
+                <Text style={styles.label}>* Punto de partida</Text>
+                <TextInput
+                    style={styles.input}
+                    value={form.punto_partida}
+                    onChangeText={(v) => handleChange('punto_partida', v)}
+                />
+            </View>
+
+            <View style={styles.inputGroup}>
+                <Text style={styles.label}>* Punto de llegada</Text>
+                <TextInput
+                    style={styles.input}
+                    value={form.punto_llegada}
+                    onChangeText={(v) => handleChange('punto_llegada', v)}
+                />
+            </View>
+
+            <View style={styles.inputGroup}>
+                <Text style={styles.label}>Tiempo aproximado</Text>
+                <TextInput
+                    style={styles.input}
+                    value={form.tiempo_aprox}
+                    onChangeText={(v) => handleChange('tiempo_aprox', v)}
+                />
+            </View>
+
+            <View style={styles.inputGroup}>
+                <Text style={styles.label}>Altitud mínima</Text>
+                <TextInput
+                    style={styles.input}
+                    keyboardType="numeric"
+                    value={form.altitud_min}
+                    onChangeText={(v) => handleChange('altitud_min', v)}
+                />
+            </View>
+
+            <View style={styles.inputGroup}>
+                <Text style={styles.label}>Altitud máxima</Text>
+                <TextInput
+                    style={styles.input}
+                    keyboardType="numeric"
+                    value={form.altitud_max}
+                    onChangeText={(v) => handleChange('altitud_max', v)}
+                />
+            </View>
+
+            <View style={styles.inputGroup}>
+                <Text style={styles.label}>Recomendaciones</Text>
+                <TextInput
+                    style={styles.input}
+                    value={form.recomendaciones}
+                    onChangeText={(v) => handleChange('recomendaciones', v)}
+                />
+            </View>
+
+            <View style={styles.inputGroup}>
+                <Text style={styles.label}>Link</Text>
+                <TextInput
+                    style={styles.input}
+                    value={form.link}
+                    onChangeText={(v) => handleChange('link', v)}
+                />
+            </View>
+
+            <Button title="Actualizar Ruta" onPress={handleSubmit} color="#63FB00" disabled={loading} />
+            {loading && <ActivityIndicator size="small" color="#63FB00" style={{ marginTop: 10 }} />}
         </ScrollView>
     );
 }
@@ -175,7 +213,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#000',
-        padding: 16,
+        padding: 16
     },
     banner: {
         width: '100%',
@@ -196,15 +234,8 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
     },
-    infoText: {
-        color: '#ccc',
-        fontSize: 14,
-        textAlign: 'center',
-        marginBottom: 20,
-        paddingHorizontal: 10,
-    },
     inputGroup: {
-        marginBottom: 15, // Aumenta la separación entre cada campo
+        marginBottom: 15,
     },
     label: {
         color: '#fff',
@@ -219,7 +250,7 @@ const styles = StyleSheet.create({
     },
     multiline: {
         height: 80,
-        textAlignVertical: 'top',
+        textAlignVertical: 'top'
     },
     pickerContainer: {
         borderWidth: 1,

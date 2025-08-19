@@ -1,6 +1,7 @@
 // src/screens/Rutes.js
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, SafeAreaView, StyleSheet, View, TouchableOpacity, Text  } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { getRutasVisibles } from '../../../api/rutas.js';
 import RutaCard from '../components/RutaCard.js';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,15 +12,25 @@ export default function Rutes({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState('Todos');
 
-  useEffect(() => {
-    const fetchRutas = async () => {
+  const fetchRutas = async () => {
+    try {
       const data = await getRutasVisibles();
       setRutas(data);
       setRutasFiltradas(data);
       setLoading(false);
-    };
-    fetchRutas();
-  }, []);
+    } catch (error) {
+      console.error('Error al obtener rutas visibles:', error);
+      setLoading(false);
+    }
+  };
+
+  // 🔄 Usa useFocusEffect en lugar de useEffect
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchRutas();
+    }, [])
+  );
+
 
   const handlePress = (ruta) => {
     navigation.navigate('RutaDetail', { ruta });
@@ -65,11 +76,18 @@ export default function Rutes({ navigation }) {
         />
       )}
       <TouchableOpacity
-      style={styles.botonFlotante}
-      onPress={() => navigation.navigate('SugerirRuta')}
-    >
-      <Ionicons name="add" size={28} color="#fff" />
-    </TouchableOpacity>
+        style={[styles.botonFlotante, styles.botonSugerir]}
+        onPress={() => navigation.navigate('SugerirRuta')}
+      >
+        <Ionicons name="add" size={28} color="#fff" />
+      </TouchableOpacity>
+      {/* Nuevo botón flotante para el panel de administración */}
+      <TouchableOpacity
+        style={[styles.botonFlotante, styles.botonAdmin]}
+        onPress={() => navigation.navigate('RutasAdmin')}
+      >
+        <Ionicons name="settings-outline" size={28} color="#fff" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -102,19 +120,25 @@ const styles = StyleSheet.create({
     color: '#000'
   },
   botonFlotante: {
-  position: 'absolute',
-  bottom: 20,
-  right: 20,
-  backgroundColor: '#63FB00',
-  borderRadius: 30,
-  width: 60,
-  height: 60,
-  justifyContent: 'center',
-  alignItems: 'center',
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.3,
-  shadowRadius: 3,
-  elevation: 5,
-},
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  botonSugerir: {
+    backgroundColor: '#63FB00', // Verde
+  },
+  botonAdmin: {
+    backgroundColor: '#FF9800', // Naranja
+    bottom: 90, // Para que no se superpongan
+  },
 });
