@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, View, Text, StyleSheet, FlatList, Image, Dimensions, TouchableOpacity, ScrollView } from "react-native";
+import { SafeAreaView, View, Text, StyleSheet, FlatList, Image, Dimensions, TouchableOpacity, ScrollView, Linking } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -49,13 +49,15 @@ export default function Home() {
                             Encontrarás diferentes rutas ciclísticas en las cuales podrás practicar. Hay mucha diversidad ya sea en el tipo de bicicleta, tu categoría (edad), clasificación (dificultad) y otros elementos.
                         </Text>
                         <Text style={styles.introTexto}>
-                            También podrás registrarte para agregar nuevas rutas, explorar una tienda virtual ciclista y mantenerte al tanto de las noticias del mundo ciclista.
+                            También podrás registrarte para agregar nuevas rutas, explorar tiendas virtuales de ciclistas y mantenerte al tanto de las noticias del mundo ciclista.
                         </Text>
                     </View>
 
-                    <TouchableOpacity style={styles.botonWrapper} onPress={() => alert('Pronto más información!')}>
+                    <TouchableOpacity style={styles.botonWrapper}
+                        onPress={() => Linking.openURL('https://chat.whatsapp.com/LXt9lyT7APc4W2f0IBMO0s')}
+                    >
                         <LinearGradient
-                            colors={["#00FF7F", "#32CD32"]} // Puedes usar tus colores
+                            colors={["#00FF7F", "#32CD32"]}
                             start={{ x: 0, y: 0 }}
                             end={{ x: 0, y: 1 }}
                             style={styles.boton}
@@ -93,7 +95,7 @@ export default function Home() {
                 <View style={styles.infoContainer}>
                     <Text style={styles.title}>Sobre nosotros</Text>
                     <Text style={styles.paragraph}>
-                        Esta es una página web dedicada a los ciclistas en Santander - Colombia, donde encontrarás rutas para practicar ciclismo, una tienda virtual y noticias del mundo ciclista.
+                        Esta dedicada a los ciclistas en Santander - Colombia, donde encontrarás rutas para practicar ciclismo, tiendas virtuales y noticias del mundo ciclista.
                     </Text>
                     <Text style={styles.paragraph}>
                         Nuestro objetivo es formar una comunidad de ciclistas apasionados que salgan a pedalear en grupo y compartan experiencias.

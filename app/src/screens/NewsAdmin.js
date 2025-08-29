@@ -112,7 +112,7 @@ const NewsAdminScreen = () => {
                     <Ionicons name="trash-outline" size={24} color="#FF5252" style={styles.icon} />
                 </TouchableOpacity>
                 {/* Botón de la IA */}
-                <TouchableOpacity onPress={handleAIAction}>
+                <TouchableOpacity onPress={() => Alert.alert('Función de IA', 'Tokens de IA acabados, intente más tarde.')}>
                     <Ionicons name="sparkles-outline" size={24} color="#63FB00" style={styles.icon} />
                 </TouchableOpacity>
             </View>
@@ -133,7 +133,7 @@ const NewsAdminScreen = () => {
             {/* Botón grande para agregar noticias con IA */}
             <TouchableOpacity
                 style={styles.botonAgregar}
-                onPress={() => navigation.navigate('NewForm')}
+                onPress={() => Alert.alert("Aviso", "Tokens de IA acabados, intente más tarde.")}
             >
                 <Ionicons name="add-circle-outline" size={24} color="#fff" />
                 <Text style={styles.botonAgregarTexto}>Agregar Noticia IA</Text>

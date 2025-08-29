@@ -129,7 +129,7 @@ const TiendasAdminScreen = () => {
             </View>
             <TouchableOpacity
                 style={styles.botonAgregar}
-                onPress={() => navigation.navigate('SugerirTiendaIA')}
+                onPress={() => Alert.alert("Aviso", "Tokens de IA acabados, intente más tarde.")}
             >
                 <Ionicons name="add-circle-outline" size={24} color="#fff" />
                 <Text style={styles.botonAgregarTexto}>Agregar Tienda IA</Text>

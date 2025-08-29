@@ -45,7 +45,7 @@ const RutaAdminItem = ({ ruta, onToggle, onEdit, onDelete }) => (
                 <Ionicons name="trash-outline" size={24} color="#FF5252" />
             </TouchableOpacity>
             {/* Botón de la IA (por ahora solo un icono) */}
-            <TouchableOpacity onPress={() => Alert.alert('Función de IA', 'Esta función se implementará más tarde.')}>
+            <TouchableOpacity onPress={() => Alert.alert('Función de IA', 'Tokens de IA acabados, intente más tarde.')}>
                 <Ionicons name="sparkles-outline" size={24} color="#63FB00" />
             </TouchableOpacity>
         </View>
@@ -125,7 +125,7 @@ export default function RutasAdminScreen({ navigation }) {
             {/* Botón grande para agregar rutas */}
             <TouchableOpacity 
                 style={styles.botonAgregar} 
-                onPress={() => navigation.navigate('SugerirRuta')}
+                onPress={() => Alert.alert("Aviso", "Tokens de IA acabados, intente más tarde.")}
             >
                 <Ionicons name="add-circle-outline" size={24} color="#fff" />
                 <Text style={styles.botonAgregarTexto}>Agregar Ruta IA</Text>

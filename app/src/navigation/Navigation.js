@@ -50,7 +50,7 @@ function RutesStack() {
 function NewsStack() {
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="News" component={NewsScreen} />
+            <Stack.Screen name="NewsHome" component={NewsScreen} /> 
             <Stack.Screen name="NewsAdmin" component={NewsAdminScreen} />
             <Stack.Screen name="NewsForm" component={NewsForm} />
             <Stack.Screen name="NewsDetail" component={NewsDetailScreen} />
